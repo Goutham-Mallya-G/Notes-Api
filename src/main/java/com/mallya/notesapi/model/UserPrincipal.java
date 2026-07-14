@@ -1,5 +1,6 @@
 package com.mallya.notesapi.model;
 
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,14 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private Users user;
-
-    public UserPrincipal(Users user) {
-        this.user = user;
-    }
-
+    private final Users user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

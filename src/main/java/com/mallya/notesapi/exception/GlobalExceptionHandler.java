@@ -26,4 +26,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String,String>> handleRunTimeException(RuntimeException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("Error",ex.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }
