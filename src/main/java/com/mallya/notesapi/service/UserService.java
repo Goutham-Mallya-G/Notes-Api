@@ -1,7 +1,6 @@
 package com.mallya.notesapi.service;
 
 import com.mallya.notesapi.dto.UserLoginRequestDTO;
-import com.mallya.notesapi.dto.UserLoginResponseDTO;
 import com.mallya.notesapi.dto.UserRegisterRequestDTO;
 import com.mallya.notesapi.dto.UserRegisterResponseDTO;
 import com.mallya.notesapi.model.Users;
@@ -9,6 +8,9 @@ import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.utils.UtilDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UtilDto utilDto;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtServices;
 
     public UserRegisterResponseDTO registerUser(@Valid UserRegisterRequestDTO requestDTO) {
         Users user = new Users();
@@ -45,16 +49,14 @@ public class UserService {
         return list;
     }
 
-    public UserLoginResponseDTO login(@Valid UserLoginRequestDTO requestDTO) {
-        Users user = userRepository.findByEmail(requestDTO.getEmail());
-        if(user == null){
-            throw new IllegalArgumentException("Invalid email or password");
-        }
+    public String login(@Valid UserLoginRequestDTO requestDTO) {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(requestDTO.getEmail(),requestDTO.getPassword()));
 
-        boolean isPasswordMatch = passwordEncoder.matches(requestDTO.getPassword() , user.getPassword());
-        if(isPasswordMatch){
-            return new UserLoginResponseDTO("User logged in");
+        if(authentication.isAuthenticated()){
+            return jwtServices.generateToken(requestDTO.getEmail());
+        }else{
+            return null;
         }
-        throw new IllegalArgumentException("Invalid email or password");
     }
 }

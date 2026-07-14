@@ -1,7 +1,6 @@
 package com.mallya.notesapi.controller;
 
 import com.mallya.notesapi.dto.UserLoginRequestDTO;
-import com.mallya.notesapi.dto.UserLoginResponseDTO;
 import com.mallya.notesapi.dto.UserRegisterRequestDTO;
 import com.mallya.notesapi.dto.UserRegisterResponseDTO;
 import com.mallya.notesapi.service.UserService;
@@ -26,7 +25,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDTO> loginUser(@Valid @RequestBody UserLoginRequestDTO requestDTO){
+    public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginRequestDTO requestDTO){
         return ResponseEntity.ok(userService.login(requestDTO));
     }
 
