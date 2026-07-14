@@ -1,4 +1,4 @@
-package com.mallya.notesapi.dto;
+package com.mallya.notesapi.dto.user.register;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,10 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class UserLoginRequestDTO {
+public class UserRegisterRequestDTO {
+    @NotNull(message = "Name is required")
+    @NotBlank(message = "Name cannot be blank")
+    private String name;
     @NotNull(message = "Email is required")
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Invalid email format")

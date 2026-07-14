@@ -1,8 +1,8 @@
 package com.mallya.notesapi.controller;
 
-import com.mallya.notesapi.dto.UserLoginRequestDTO;
-import com.mallya.notesapi.dto.UserRegisterRequestDTO;
-import com.mallya.notesapi.dto.UserRegisterResponseDTO;
+import com.mallya.notesapi.dto.user.login.UserLoginRequestDTO;
+import com.mallya.notesapi.dto.user.register.UserRegisterRequestDTO;
+import com.mallya.notesapi.dto.user.register.UserRegisterResponseDTO;
 import com.mallya.notesapi.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.mallya.notesapi.dto;
+package com.mallya.notesapi.dto.user.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

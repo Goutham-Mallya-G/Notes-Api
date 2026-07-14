@@ -1,8 +1,8 @@
 package com.mallya.notesapi.service;
 
-import com.mallya.notesapi.dto.UserLoginRequestDTO;
-import com.mallya.notesapi.dto.UserRegisterRequestDTO;
-import com.mallya.notesapi.dto.UserRegisterResponseDTO;
+import com.mallya.notesapi.dto.user.login.UserLoginRequestDTO;
+import com.mallya.notesapi.dto.user.register.UserRegisterRequestDTO;
+import com.mallya.notesapi.dto.user.register.UserRegisterResponseDTO;
 import com.mallya.notesapi.model.Users;
 import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.utils.UtilDto;
