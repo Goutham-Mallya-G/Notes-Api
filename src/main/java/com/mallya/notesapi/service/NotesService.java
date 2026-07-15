@@ -67,4 +67,12 @@ public class NotesService {
 
         notesRepository.delete(note);
     }
+
+    public List<NotesResponseDTO> getNoteBySearch(String title, String email) {
+        List<NotesResponseDTO> list = new ArrayList<>();
+        for(Notes note : notesRepository.findByUserEmailAndTitleContainingIgnoreCase(email, title)) {
+            list.add(utilDto.convertNotesToNotsResponseDTO(note));
+        }
+        return list;
+    }
 }

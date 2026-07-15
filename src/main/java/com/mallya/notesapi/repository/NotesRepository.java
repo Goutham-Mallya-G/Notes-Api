@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NotesRepository extends JpaRepository<Notes, Long> {
-    public List<Notes> findByUserEmail(String email);
+    List<Notes> findByUserEmail(String email);
 
     Optional<Notes> findByUserEmailAndId(String email, Long id);
+
+    List<Notes> findByUserEmailAndTitleContainingIgnoreCase(String email, String title);
 }

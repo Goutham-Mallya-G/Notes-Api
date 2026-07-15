@@ -51,4 +51,10 @@ public class NotesController {
             notesService.deleteNote(id,userDetails.getUsername());
             return ResponseEntity.ok("Note Deleted");
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NotesResponseDTO>> searchNote(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getNoteBySearch(title,userDetails.getUsername());
+        return ResponseEntity.ok(notes);
+    }
 }
