@@ -39,6 +39,7 @@ public class NotesService {
 
         Category category = categoryRepository.findByUserEmailAndId(email, requestDTO.getCategoryId()).orElseThrow(() -> new RuntimeException("No category Found"));
         note.setCategory(category);
+        note.setArchived(false);
         List<Notes> list = category.getNotes();
         list.add(note);
         category.setNotes(list);
@@ -50,7 +51,7 @@ public class NotesService {
 
     public List<NotesResponseDTO> getNotes(String email){
         List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmail(email)){
+        for(Notes note : notesRepository.findByUserEmailAndIsArchivedFalseOrNull(email)){
             list.add(utilDto.convertNotesToNotsResponseDTO(note));
         }
         return list;
@@ -84,12 +85,7 @@ public class NotesService {
         Category category = note.getCategory();
         List<Notes> list = category.getNotes();
 
-        for(Notes notes : list){
-            if(notes.equals(note)){
-                list.remove(note);
-                break;
-            }
-        }
+       list.remove(note);
 
         category.setNotes(list);
         categoryRepository.save(category);
@@ -106,21 +102,16 @@ public class NotesService {
     }
 
 
-    public Map<String, String> moveNoteCategory(Long from, Long to, String email) {
-        Notes note = notesRepository.findByUserEmailAndId(email,from)
+    public Map<String, String> moveNoteCategory(Long id, Long categoryId, String email) {
+        Notes note = notesRepository.findByUserEmailAndId(email,id)
                 .orElseThrow(() -> new NoteNotFoundException("No Notes Found"));
 
-        Category oldCategory = categoryRepository.findByUserEmailAndId(email,from).orElseThrow(() -> new RuntimeException("No category found to move note"));
-        Category newCategory = categoryRepository.findByUserEmailAndId(email,to).orElseThrow(() -> new RuntimeException("No category found to move note"));
+        Category oldCategory = note.getCategory();
+        Category newCategory = categoryRepository.findByUserEmailAndId(email,categoryId).orElseThrow(() -> new RuntimeException("No category found to move note"));
 
         List<Notes> oldCategoryNotes = oldCategory.getNotes();
 
-        for(Notes notes : oldCategoryNotes){
-            if(notes.equals(note)){
-                oldCategoryNotes.remove(note);
-                break;
-            }
-        }
+        oldCategoryNotes.remove(note);
 
         oldCategory.setNotes(oldCategoryNotes);
         categoryRepository.save(oldCategory);
@@ -131,8 +122,37 @@ public class NotesService {
         categoryRepository.save(newCategory);
 
         note.setCategory(newCategory);
+        notesRepository.save(note);
 
         return Map.of("message" , "Note moved");
 
+    }
+
+    public Map<String, String> archiveNote(Long id, String email) {
+        Notes note = notesRepository.findByUserEmailAndId(email,id).orElseThrow(() -> new NoteNotFoundException("No note found"));
+        if(note.isArchived()){
+            throw new RuntimeException("Note is already archived");
+        }
+        note.setArchived(true);
+        notesRepository.save(note);
+        return Map.of("Message","Note archived");
+    }
+
+    public Map<String, String> unArchiveNote(Long id, String email) {
+        Notes note = notesRepository.findByUserEmailAndId(email,id).orElseThrow(() -> new NoteNotFoundException("No note found"));
+        if(!note.isArchived()){
+            throw new RuntimeException("Note is already active");
+        }
+        note.setArchived(false);
+        notesRepository.save(note);
+        return Map.of("Message","Note is active");
+    }
+
+    public List<NotesResponseDTO> getArchivedNotes(String email) {
+        List<NotesResponseDTO> list = new ArrayList<>();
+        for(Notes note : notesRepository.findByUserEmailAndIsArchivedTrue(email)){
+            list.add(utilDto.convertNotesToNotsResponseDTO(note));
+        }
+        return list;
     }
 }

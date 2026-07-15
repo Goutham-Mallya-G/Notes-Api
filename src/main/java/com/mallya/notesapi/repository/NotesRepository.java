@@ -12,4 +12,8 @@ public interface NotesRepository extends JpaRepository<Notes, Long> {
     Optional<Notes> findByUserEmailAndId(String email, Long id);
 
     List<Notes> findByUserEmailAndTitleContainingIgnoreCase(String email, String title);
+
+    List<Notes> findByUserEmailAndIsArchivedTrue(String email);
+
+    List<Notes> findByUserEmailAndIsArchivedFalseOrNull(String email);
 }

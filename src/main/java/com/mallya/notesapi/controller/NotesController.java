@@ -64,4 +64,22 @@ public class NotesController {
         Map<String, String> response = notesService.moveNoteCategory(from, to, userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/archive/{id}")
+    public ResponseEntity<Map<String,String>> archiveNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        Map<String, String> response = notesService.archiveNote(id, userDetails.getUsername());
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/unArchive/{id}")
+    public ResponseEntity<Map<String,String>> unArchiveNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        Map<String, String> response = notesService.unArchiveNote(id, userDetails.getUsername());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("listAllArchivedNotes")
+    public ResponseEntity<List<NotesResponseDTO>> getArchivedNotes(@AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> list = notesService.getArchivedNotes(userDetails.getUsername());
+        return ResponseEntity.ok(list);
+    }
 }
