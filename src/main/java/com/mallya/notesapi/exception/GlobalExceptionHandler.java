@@ -1,6 +1,7 @@
 package com.mallya.notesapi.exception;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,11 @@ public class GlobalExceptionHandler {
         Map<String,String> errors = new HashMap<>();
         errors.put("Error",ex.getMessage());
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(NoteNotFoundException.class)
+    public ResponseEntity<String> handleNoteNotFoundException(NoteNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found");
     }
 
 }

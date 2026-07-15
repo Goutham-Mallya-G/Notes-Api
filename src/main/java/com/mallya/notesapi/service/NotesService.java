@@ -2,6 +2,7 @@ package com.mallya.notesapi.service;
 
 import com.mallya.notesapi.dto.note.CreateNotesRequestDTO;
 import com.mallya.notesapi.dto.note.NotesResponseDTO;
+import com.mallya.notesapi.exception.NoteNotFoundException;
 import com.mallya.notesapi.model.Notes;
 import com.mallya.notesapi.model.Users;
 import com.mallya.notesapi.repository.NotesRepository;
@@ -11,9 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,8 +36,6 @@ public class NotesService {
     }
 
     public List<NotesResponseDTO> getNotes(String email){
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
         List<NotesResponseDTO> list = new ArrayList<>();
         for(Notes note : notesRepository.findByUserEmail(email)){
             list.add(utilDto.convertNotesToNotsResponseDTO(note));
@@ -46,34 +43,27 @@ public class NotesService {
         return list;
     }
 
-    public NotesResponseDTO getNotById(Long id, String email) {
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
-
+    public NotesResponseDTO getNoteById(Long id, String email) {
         return utilDto.convertNotesToNotsResponseDTO(notesRepository
                         .findByUserEmailAndId(email, id)
-                        .orElseThrow(() -> new RuntimeException("No Notes found")));
+                        .orElseThrow(() -> new NoteNotFoundException("No Notes found")));
     }
 
     public NotesResponseDTO updateNote(Long id, @Valid CreateNotesRequestDTO request, String email) {
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
-
-        Notes note = notesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No Notes Found"));
+        Notes note = notesRepository.findByUserEmailAndId(email, id)
+                .orElseThrow(() -> new NoteNotFoundException("No Notes found"));
 
         note.setTitle(request.getTitle());
         note.setContent(request.getContent());
+
+        notesRepository.save(note);
 
         return utilDto.convertNotesToNotsResponseDTO(note);
     }
 
     public void deleteNote(Long id, String email) {
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
-
-        Notes note = notesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No Notes Found"));
+        Notes note = notesRepository.findByUserEmailAndId(email,id)
+                .orElseThrow(() -> new NoteNotFoundException("No Notes Found"));
 
         notesRepository.delete(note);
     }
