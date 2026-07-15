@@ -1,33 +1,27 @@
 package com.mallya.notesapi.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Data
-public class Notes {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
     @NotBlank
-    @Size(min=3, max=50)
-    private String title;
-    @NotNull
-    @NotBlank
-    @Size(min=1, max=10000)
-    private String content;
+    private String name;
+    @OneToMany(mappedBy = "category")
+    @JsonBackReference
+    private List<Notes> notes;
     @ManyToOne
-    @JoinColumn(name = "users_id")
+    @JoinColumn(name = "categories")
     @JsonBackReference
     private Users user;
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    @JsonBackReference
-    private Category category;
 }

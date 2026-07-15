@@ -35,6 +35,7 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(requestDTO.getPassword());
         user.setName(requestDTO.getName());
         user.setEmail(requestDTO.getEmail());
+        user.setCategories(new ArrayList<>());
         user.setPassword(hashedPassword);
 
         return utilDto.convertUserToUserResponseDTO(userRepository.save(user));

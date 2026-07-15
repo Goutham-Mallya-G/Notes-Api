@@ -27,4 +27,7 @@ public class Users {
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     private List<Notes> notesList;
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private List<Category> categories;
 }
