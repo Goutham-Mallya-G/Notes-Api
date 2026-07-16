@@ -89,6 +89,7 @@ public class NotesService {
                 .orElseThrow(() -> new NotesException("No Notes Found"));
 
         note.setDeleted(true);
+        note.setDeletedAt(LocalDateTime.now());
 
         notesRepository.save(note);
 
@@ -100,6 +101,7 @@ public class NotesService {
                 .orElseThrow(() -> new NotesException("No Notes Found"));
 
         note.setDeleted(false);
+        note.setDeletedAt(null);
 
         notesRepository.save(note);
         return Map.of("Message", "Note restored successfully");
@@ -243,5 +245,11 @@ public class NotesService {
         Notes note = notesRepository.findByUserEmailAndIdAndDeletedTrue(email,id).orElseThrow(() -> new NotesException("No note found"));
         notesRepository.delete(note);
         return Map.of("Message","Note deleted successfully");
+    }
+
+    public Map<String, String> emptyTrash(String email) {
+        List<Notes> notes = notesRepository.findByUserEmailAndDeletedTrue(email);
+        notesRepository.deleteAll(notes);
+        return Map.of("Message","Trash emptied");
     }
 }

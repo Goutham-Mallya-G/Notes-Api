@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -42,5 +43,6 @@ public class Notes {
     private LocalDateTime createdAt;
     @NotNull
     private LocalDateTime updatedAt;
-
+    @Nullable
+    private LocalDateTime deletedAt;
 }
