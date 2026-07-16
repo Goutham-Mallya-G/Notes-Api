@@ -3,11 +3,15 @@ package com.mallya.notesapi.service;
 import com.mallya.notesapi.dto.user.login.UserLoginRequestDTO;
 import com.mallya.notesapi.dto.user.register.UserRegisterRequestDTO;
 import com.mallya.notesapi.dto.user.register.UserRegisterResponseDTO;
+import com.mallya.notesapi.model.Category;
 import com.mallya.notesapi.model.Users;
 import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.utils.UtilDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,12 +46,10 @@ public class UserService {
 
     }
 
-    public List<UserRegisterResponseDTO> getAllUsers() {
-        List<UserRegisterResponseDTO> list = new ArrayList<>();
-        for(Users user : userRepository.findAll()){
-            list.add(utilDto.convertUserToUserResponseDTO(user));
-        }
-        return list;
+    public Page<UserRegisterResponseDTO> getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Users> usersPage = userRepository.findAll(pageable);
+        return usersPage.map(utilDto::convertUserToUserResponseDTO);
     }
 
     public String login(@Valid UserLoginRequestDTO requestDTO) {

@@ -10,6 +10,9 @@ import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.utils.UtilDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -42,14 +45,8 @@ public class CategoryService {
     }
 
     public List<CategoryResponseDTO> listAllCategories(String email) {
-        Users user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("No user found"));
-
-        List<CategoryResponseDTO> list = new ArrayList<>();
-
-        for(Category category : user.getCategories()){
-            list.add(utilDto.convertCategoryToCategoryResponseDTO(category));
-        }
-        return list;
+        List<Category> list = categoryRepository.findByUserEmail(email);
+        return list.stream().map(utilDto::convertCategoryToCategoryResponseDTO).toList();
     }
 
     public CategoryResponseDTO updateCategory(Long id, @Valid CategoryRequestDTO requestDTO, String email) {

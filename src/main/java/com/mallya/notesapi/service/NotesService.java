@@ -16,6 +16,9 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -55,12 +58,10 @@ public class NotesService {
         return utilDto.convertNotesToNotsResponseDTO(notesRepository.save(note));
     }
 
-    public List<NotesResponseDTO> getNotes(String email){
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndArchivedFalseAndDeletedFalse(email)){
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getNotes(String email, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage =  notesRepository.findByUserEmailAndArchivedFalseAndDeletedFalse(email, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
     public NotesResponseDTO getNoteById(Long id, String email) {
@@ -72,9 +73,6 @@ public class NotesService {
     public NotesResponseDTO updateNote(Long id, @Valid NotesRequestDTO request, String email) {
         Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email, id)
                 .orElseThrow(() -> new NotesException("No Notes found"));
-
-        Category category = categoryRepository.findByUserEmailAndId(email, request.getCategoryId()).orElseThrow(() -> new RuntimeException("No category found"));
-
         note.setTitle(request.getTitle());
         note.setContent(request.getContent());
         note.setUpdatedAt(LocalDateTime.now());
@@ -107,52 +105,40 @@ public class NotesService {
         return Map.of("Message", "Note restored successfully");
     }
 
-    public List<NotesResponseDTO> getNoteBySearchByTitle(String title, String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndDeletedFalseAndArchivedFalseAndTitleContainingIgnoreCase(email, title)) {
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getNoteBySearchByTitle(String title, String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.findByUserEmailAndDeletedFalseAndArchivedFalseAndTitleContainingIgnoreCase(email, title, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
-    public List<NotesResponseDTO> getNoteBySearchByContent(String content, String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for (Notes note : notesRepository.findByUserEmailAndDeletedFalseAndArchivedFalseAndContentContainingIgnoreCase(email, content)) {
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getNoteBySearchByContent(String content, String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.findByUserEmailAndDeletedFalseAndArchivedFalseAndContentContainingIgnoreCase(email, content, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
-    public List<NotesResponseDTO> getNoteBySearchByQuery(String query, String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for (Notes note : notesRepository.searchNotes(email, query)) {
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getNoteBySearchByQuery(String query, String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.searchNotes(email, query, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
-    public List<NotesResponseDTO> getDeletedNoteBySearchByTitle(String title, String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndDeletedTrueAndTitleContainingIgnoreCase(email, title)) {
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getDeletedNoteBySearchByTitle(String title, String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.findByUserEmailAndDeletedTrueAndTitleContainingIgnoreCase(email, title, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
-    public List<NotesResponseDTO> getDeletedNoteBySearchByContent(String content, String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndDeletedTrueAndAndContentContainingIgnoreCase(email, content)) {
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getDeletedNoteBySearchByContent(String content, String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.findByUserEmailAndDeletedTrueAndContentContainingIgnoreCase(email, content, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
-    public List<NotesResponseDTO> getDeletedNoteBySearchByQuery(String query, String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for (Notes note : notesRepository.searchDeletedNotes(email, query)) {
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getDeletedNoteBySearchByQuery(String query, String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.searchDeletedNotes(email, query, pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
     public Map<String, String> moveNoteCategory(Long id, Long categoryId, String email) {
@@ -205,12 +191,10 @@ public class NotesService {
         return Map.of("Message","Note is active");
     }
 
-    public List<NotesResponseDTO> getArchivedNotes(String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndArchivedTrueAndDeletedFalse(email)){
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getArchivedNotes(String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.findByUserEmailAndArchivedTrueAndDeletedFalse(email,pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
     public Map<String, String> favoriteNote(Long id, String email) {
@@ -233,12 +217,10 @@ public class NotesService {
         return Map.of("Message", "Note set to unFavorite");
     }
 
-    public List<NotesResponseDTO> getFavoriteNotes(String email) {
-        List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndFavoriteTrueAndDeletedFalse(email)){
-            list.add(utilDto.convertNotesToNotsResponseDTO(note));
-        }
-        return list;
+    public Page<NotesResponseDTO> getFavoriteNotes(String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notes> notesPage = notesRepository.findByUserEmailAndFavoriteTrueAndDeletedFalse(email,pageable);
+        return notesPage.map(utilDto::convertNotesToNotsResponseDTO);
     }
 
     public Map<String, String> deleteNoteInTrash(Long id, String email) {

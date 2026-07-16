@@ -5,18 +5,18 @@ import com.mallya.notesapi.dto.note.NotesResponseDTO;
 import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.service.NotesService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/notes")
 @RequiredArgsConstructor
 public class NotesController {
@@ -31,8 +31,8 @@ public class NotesController {
     }
 
     @GetMapping("/allNotes")
-    public ResponseEntity<?> getAllNotes(@AuthenticationPrincipal UserDetails userDetails) {
-            List<NotesResponseDTO> list = notesService.getNotes(userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> getAllNotes(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+            Page<NotesResponseDTO> list = notesService.getNotes(userDetails.getUsername(), page, size);
             return ResponseEntity.ok(list);
     }
 
@@ -60,38 +60,38 @@ public class NotesController {
 
 
     @GetMapping("/searchByTitle")
-    public ResponseEntity<List<NotesResponseDTO>> searchNoteByTitle(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getNoteBySearchByTitle(title,userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> searchNoteByTitle(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> notes = notesService.getNoteBySearchByTitle(title,userDetails.getUsername(), page, size);
         return ResponseEntity.ok(notes);
     }
 
     @GetMapping("/searchByContent")
-    public ResponseEntity<List<NotesResponseDTO>> searchNoteByContent(@RequestParam String content, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getNoteBySearchByContent(content,userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> searchNoteByContent(@RequestParam String content, @AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> notes = notesService.getNoteBySearchByContent(content,userDetails.getUsername(), page, size);
         return ResponseEntity.ok(notes);
     }
 
     @GetMapping("/searchByQuery")
-    public ResponseEntity<List<NotesResponseDTO>> searchNoteByQuery(@RequestParam String query, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getNoteBySearchByQuery(query,userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> searchNoteByQuery(@RequestParam String query, @AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> notes = notesService.getNoteBySearchByQuery(query,userDetails.getUsername(), page, size);
         return ResponseEntity.ok(notes);
     }
 
     @GetMapping("/searchDeletedByTitle")
-    public ResponseEntity<List<NotesResponseDTO>> searchDeletedNoteByTitle(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByTitle(title,userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> searchDeletedNoteByTitle(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByTitle(title,userDetails.getUsername(), page, size);
         return ResponseEntity.ok(notes);
     }
 
     @GetMapping("/searchDeletedByContent")
-    public ResponseEntity<List<NotesResponseDTO>> searchDeletedNoteByContent(@RequestParam String content, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByContent(content,userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> searchDeletedNoteByContent(@RequestParam String content, @AuthenticationPrincipal UserDetails userDetails, @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByContent(content,userDetails.getUsername(), page, size);
         return ResponseEntity.ok(notes);
     }
 
     @GetMapping("/searchDeletedByQuery")
-    public ResponseEntity<List<NotesResponseDTO>> searchDeletedNoteByQuery(@RequestParam String query, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByQuery(query,userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> searchDeletedNoteByQuery(@RequestParam String query, @AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByQuery(query,userDetails.getUsername(), page, size);
         return ResponseEntity.ok(notes);
     }
 
@@ -124,8 +124,8 @@ public class NotesController {
     }
 
     @GetMapping("listAllArchivedNotes")
-    public ResponseEntity<List<NotesResponseDTO>> getArchivedNotes(@AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> list = notesService.getArchivedNotes(userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> getArchivedNotes(@AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> list = notesService.getArchivedNotes(userDetails.getUsername(), page, size);
         return ResponseEntity.ok(list);
     }
 
@@ -142,8 +142,8 @@ public class NotesController {
     }
 
     @GetMapping("listAllFavoriteNotes")
-    public ResponseEntity<List<NotesResponseDTO>> getFavoriteNotes(@AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> list = notesService.getFavoriteNotes(userDetails.getUsername());
+    public ResponseEntity<Page<NotesResponseDTO>> getFavoriteNotes(@AuthenticationPrincipal UserDetails userDetails,@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size){
+        Page<NotesResponseDTO> list = notesService.getFavoriteNotes(userDetails.getUsername(), page, size);
         return ResponseEntity.ok(list);
     }
 

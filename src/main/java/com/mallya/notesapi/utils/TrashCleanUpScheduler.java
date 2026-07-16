@@ -18,6 +18,8 @@ public class TrashCleanUpScheduler {
     public void deleteExpired() {
         LocalDateTime expiry = LocalDateTime.now().minusDays(30);
         List<Notes> notes = notesRepository.findByDeletedTrueAndDeletedAtBefore(expiry);
-        notesRepository.deleteAll(notes);
+        if (!notes.isEmpty()) {
+            notesRepository.deleteAll(notes);
+        }
     }
 }

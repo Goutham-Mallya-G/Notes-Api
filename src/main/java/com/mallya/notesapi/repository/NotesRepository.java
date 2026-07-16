@@ -1,6 +1,8 @@
 package com.mallya.notesapi.repository;
 
 import com.mallya.notesapi.model.Notes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,19 +15,19 @@ public interface NotesRepository extends JpaRepository<Notes, Long> {
 
     Optional<Notes> findByUserEmailAndIdAndDeletedFalse(String email, Long id);
 
-    List<Notes> findByUserEmailAndArchivedFalseAndDeletedFalse(String email);
+    Page<Notes> findByUserEmailAndArchivedFalseAndDeletedFalse(String email, Pageable pageable);
 
     Optional<Notes> findByUserEmailAndIdAndArchivedTrue(String email, Long id);
 
     Optional<Notes> findByUserEmailAndIdAndDeletedTrue(String email, Long id);
 
-    List<Notes> findByUserEmailAndDeletedFalseAndArchivedFalseAndTitleContainingIgnoreCase(String email, String title);
+    Page<Notes> findByUserEmailAndDeletedFalseAndArchivedFalseAndTitleContainingIgnoreCase(String email, String title, Pageable pageable);
 
-    List<Notes> findByUserEmailAndFavoriteTrueAndDeletedFalse(String email);
+    Page<Notes> findByUserEmailAndFavoriteTrueAndDeletedFalse(String email, Pageable pageable);
 
-    List<Notes> findByUserEmailAndArchivedTrueAndDeletedFalse(String email);
+    Page<Notes> findByUserEmailAndArchivedTrueAndDeletedFalse(String email, Pageable pageable);
 
-    List<Notes> findByUserEmailAndDeletedFalseAndArchivedFalseAndContentContainingIgnoreCase(String email, String content);
+    Page<Notes> findByUserEmailAndDeletedFalseAndArchivedFalseAndContentContainingIgnoreCase(String email, String content, Pageable pageable);
 
     @Query("""
         SELECT n
@@ -38,12 +40,13 @@ public interface NotesRepository extends JpaRepository<Notes, Long> {
              OR LOWER(n.content) LIKE LOWER(CONCAT('%', :query, '%'))
           )
     """)
-    List<Notes> searchNotes(@Param("email") String email,
-                            @Param("query") String query);
+    Page<Notes> searchNotes(@Param("email") String email,
+                            @Param("query") String query,
+                            Pageable pageable);
 
-    List<Notes> findByUserEmailAndDeletedTrueAndTitleContainingIgnoreCase(String email, String title);
+    Page<Notes> findByUserEmailAndDeletedTrueAndTitleContainingIgnoreCase(String email, String title,Pageable pageable);
 
-    List<Notes> findByUserEmailAndDeletedTrueAndAndContentContainingIgnoreCase(String email, String content);
+    Page<Notes> findByUserEmailAndDeletedTrueAndContentContainingIgnoreCase(String email, String content, Pageable pageable);
 
     @Query("""
         SELECT n
@@ -55,7 +58,7 @@ public interface NotesRepository extends JpaRepository<Notes, Long> {
              OR LOWER(n.content) LIKE LOWER(CONCAT('%', :query, '%'))
           )
     """)
-    List<Notes> searchDeletedNotes(String email, String query);
+    Page<Notes> searchDeletedNotes(String email, String query, Pageable pageable);
 
     List<Notes> findByUserEmailAndDeletedTrue(String email);
 
