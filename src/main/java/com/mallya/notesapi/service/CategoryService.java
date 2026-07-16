@@ -2,6 +2,7 @@ package com.mallya.notesapi.service;
 
 import com.mallya.notesapi.dto.category.CategoryRequestDTO;
 import com.mallya.notesapi.dto.category.CategoryResponseDTO;
+import com.mallya.notesapi.exception.CategoryException;
 import com.mallya.notesapi.model.Category;
 import com.mallya.notesapi.model.Users;
 import com.mallya.notesapi.repository.CategoryRepository;
@@ -27,7 +28,7 @@ public class CategoryService {
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("No user found"));
 
         if(categoryRepository.existsByUserEmailAndNameIgnoreCase(email,requestDTO.getName())){
-            throw new RuntimeException("Category already exists");
+            throw new CategoryException("Category already exists");
         }
 
         Category category = new Category();
@@ -52,7 +53,7 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO updateCategory(Long id, @Valid CategoryRequestDTO requestDTO, String email) {
-        Category category = categoryRepository.findByUserEmailAndId(email, id).orElseThrow(() -> new RuntimeException("No Category found"));
+        Category category = categoryRepository.findByUserEmailAndId(email, id).orElseThrow(() -> new CategoryException("No Category found"));
 
         category.setName(requestDTO.getName());
 
@@ -63,7 +64,7 @@ public class CategoryService {
     }
 
     public Map<String,String> deleteCategory(Long id, String email) {
-        Category category = categoryRepository.findByUserEmailAndId(email, id).orElseThrow(() -> new RuntimeException("No Category found"));
+        Category category = categoryRepository.findByUserEmailAndId(email, id).orElseThrow(() -> new CategoryException("No Category found"));
         if(!category.getNotes().isEmpty()) {
             return Map.of("message", "Category contains notes. Move or delete them first");
         }

@@ -34,8 +34,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(NoteNotFoundException.class)
-    public ResponseEntity<String> handleNoteNotFoundException(NoteNotFoundException ex){
+    @ExceptionHandler(NotesException.class)
+    public ResponseEntity<String> handleNoteNotFoundException(NotesException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found");
+    }
+
+    @ExceptionHandler(CategoryException.class)
+    public ResponseEntity<String> handleNoteNotFoundException(CategoryException ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found");
     }
 

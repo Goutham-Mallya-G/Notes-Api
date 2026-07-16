@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -59,9 +60,44 @@ public class NotesController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<NotesResponseDTO>> searchNote(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
-        List<NotesResponseDTO> notes = notesService.getNoteBySearch(title,userDetails.getUsername());
+    public ResponseEntity<List<NotesResponseDTO>> searchNoteByTitle(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getNoteBySearchByTitle(title,userDetails.getUsername());
         return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NotesResponseDTO>> searchNoteByContent(@RequestParam String content, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getNoteBySearchByContent(content,userDetails.getUsername());
+        return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NotesResponseDTO>> searchNoteByQuery(@RequestParam String query, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getNoteBySearchByQuery(query,userDetails.getUsername());
+        return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/searchDeleted")
+    public ResponseEntity<List<NotesResponseDTO>> searchDeletedNoteByTitle(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByTitle(title,userDetails.getUsername());
+        return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/searchDeleted")
+    public ResponseEntity<List<NotesResponseDTO>> searchDeletedNoteByContent(@RequestParam String content, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByContent(content,userDetails.getUsername());
+        return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NotesResponseDTO>> searchDeletedNoteByQuery(@RequestParam String query, @AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> notes = notesService.getDeletedNoteBySearchByQuery(query,userDetails.getUsername());
+        return ResponseEntity.ok(notes);
+    }
+
+    @DeleteMapping("/deleteTrash/{id}")
+    public ResponseEntity<Map<String,String>> deleteNotesInTrash(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(notesService.deleteNoteInTrash(id,userDetails.getUsername()));
     }
 
     @PutMapping("/moveCategory")
