@@ -9,7 +9,6 @@ import lombok.Data;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Data

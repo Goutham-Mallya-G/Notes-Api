@@ -3,7 +3,6 @@ package com.mallya.notesapi.service;
 import com.mallya.notesapi.dto.user.login.UserLoginRequestDTO;
 import com.mallya.notesapi.dto.user.register.UserRegisterRequestDTO;
 import com.mallya.notesapi.dto.user.register.UserRegisterResponseDTO;
-import com.mallya.notesapi.model.Category;
 import com.mallya.notesapi.model.Users;
 import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.utils.UtilDto;
@@ -19,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
