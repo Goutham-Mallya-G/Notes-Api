@@ -10,11 +10,15 @@ import com.mallya.notesapi.repository.CategoryRepository;
 import com.mallya.notesapi.repository.NotesRepository;
 import com.mallya.notesapi.repository.UserRepository;
 import com.mallya.notesapi.utils.UtilDto;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +44,10 @@ public class NotesService {
         Category category = categoryRepository.findByUserEmailAndId(email, requestDTO.getCategoryId()).orElseThrow(() -> new RuntimeException("No category Found"));
         note.setCategory(category);
         note.setArchived(false);
-        List<Notes> list = category.getNotes();
-        list.add(note);
-        category.setNotes(list);
+        LocalDateTime now = LocalDateTime.now();
+        note.setCreatedAt(now);
+        note.setUpdatedAt(now);
+        category.getNotes().add(note);
 
         categoryRepository.save(category);
 
@@ -51,7 +56,7 @@ public class NotesService {
 
     public List<NotesResponseDTO> getNotes(String email){
         List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndIsArchivedFalseOrNull(email)){
+        for(Notes note : notesRepository.findByUserEmailAndArchivedFalseAndDeletedFalse(email)){
             list.add(utilDto.convertNotesToNotsResponseDTO(note));
         }
         return list;
@@ -59,12 +64,12 @@ public class NotesService {
 
     public NotesResponseDTO getNoteById(Long id, String email) {
         return utilDto.convertNotesToNotsResponseDTO(notesRepository
-                        .findByUserEmailAndId(email, id)
+                        .findByUserEmailAndIdAndDeletedFalse(email, id)
                         .orElseThrow(() -> new NoteNotFoundException("No Notes found")));
     }
 
     public NotesResponseDTO updateNote(Long id, @Valid NotesRequestDTO request, String email) {
-        Notes note = notesRepository.findByUserEmailAndId(email, id)
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email, id)
                 .orElseThrow(() -> new NoteNotFoundException("No Notes found"));
 
         Category category = categoryRepository.findByUserEmailAndId(email, request.getCategoryId()).orElseThrow(() -> new RuntimeException("No category found"));
@@ -72,30 +77,37 @@ public class NotesService {
         note.setTitle(request.getTitle());
         note.setContent(request.getContent());
         note.setCategory(category);
+        note.setUpdatedAt(LocalDateTime.now());
 
         notesRepository.save(note);
 
         return utilDto.convertNotesToNotsResponseDTO(note);
     }
 
-    public void deleteNote(Long id, String email) {
-        Notes note = notesRepository.findByUserEmailAndId(email,id)
+    public Map<String,String > deleteNote(Long id, String email) {
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email,id)
                 .orElseThrow(() -> new NoteNotFoundException("No Notes Found"));
 
-        Category category = note.getCategory();
-        List<Notes> list = category.getNotes();
+        note.setDeleted(true);
 
-       list.remove(note);
+        notesRepository.save(note);
 
-        category.setNotes(list);
-        categoryRepository.save(category);
+        return Map.of("Message","Note deleted");
+    }
 
-        notesRepository.delete(note);
+    public Map<String, String> restoreNote(Long id, String email){
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedTrue(email,id)
+                .orElseThrow(() -> new NoteNotFoundException("No Notes Found"));
+
+        note.setDeleted(false);
+
+        notesRepository.save(note);
+        return Map.of("Message", "Note restored successfully");
     }
 
     public List<NotesResponseDTO> getNoteBySearch(String title, String email) {
         List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndTitleContainingIgnoreCase(email, title)) {
+        for(Notes note : notesRepository.findByUserEmailAndDeletedFalseAndArchivedFalseAndTitleContainingIgnoreCase(email, title)) {
             list.add(utilDto.convertNotesToNotsResponseDTO(note));
         }
         return list;
@@ -103,11 +115,15 @@ public class NotesService {
 
 
     public Map<String, String> moveNoteCategory(Long id, Long categoryId, String email) {
-        Notes note = notesRepository.findByUserEmailAndId(email,id)
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email,id)
                 .orElseThrow(() -> new NoteNotFoundException("No Notes Found"));
 
         Category oldCategory = note.getCategory();
         Category newCategory = categoryRepository.findByUserEmailAndId(email,categoryId).orElseThrow(() -> new RuntimeException("No category found to move note"));
+
+        if(oldCategory.equals(newCategory)){
+            throw new RuntimeException("Cant move note to the existing category");
+        }
 
         List<Notes> oldCategoryNotes = oldCategory.getNotes();
 
@@ -129,7 +145,7 @@ public class NotesService {
     }
 
     public Map<String, String> archiveNote(Long id, String email) {
-        Notes note = notesRepository.findByUserEmailAndId(email,id).orElseThrow(() -> new NoteNotFoundException("No note found"));
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email,id).orElseThrow(() -> new NoteNotFoundException("No note found"));
         if(note.isArchived()){
             throw new RuntimeException("Note is already archived");
         }
@@ -139,7 +155,7 @@ public class NotesService {
     }
 
     public Map<String, String> unArchiveNote(Long id, String email) {
-        Notes note = notesRepository.findByUserEmailAndId(email,id).orElseThrow(() -> new NoteNotFoundException("No note found"));
+        Notes note = notesRepository.findByUserEmailAndIdAndAndArchivedTrue(email,id).orElseThrow(() -> new NoteNotFoundException("No note found"));
         if(!note.isArchived()){
             throw new RuntimeException("Note is already active");
         }
@@ -150,7 +166,35 @@ public class NotesService {
 
     public List<NotesResponseDTO> getArchivedNotes(String email) {
         List<NotesResponseDTO> list = new ArrayList<>();
-        for(Notes note : notesRepository.findByUserEmailAndIsArchivedTrue(email)){
+        for(Notes note : notesRepository.findByUserEmailAndArchivedTrueAndDeletedFalse(email)){
+            list.add(utilDto.convertNotesToNotsResponseDTO(note));
+        }
+        return list;
+    }
+
+    public Map<String, String> favoriteNote(Long id, String email) {
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email,id).orElseThrow(() ->  new NoteNotFoundException("No notes found"));
+        if(note.isFavorite()){
+            throw new RuntimeException("Note is already favorite");
+        }
+        note.setFavorite(true);
+        notesRepository.save(note);
+        return Map.of("Message", "Note set to favorite");
+    }
+
+    public Map<String, String> unFavoriteNote(Long id, String email) {
+        Notes note = notesRepository.findByUserEmailAndIdAndDeletedFalse(email,id).orElseThrow(() ->  new NoteNotFoundException("No notes found"));
+        if(!note.isFavorite()){
+            throw new RuntimeException("Note is not favorite");
+        }
+        note.setFavorite(false);
+        notesRepository.save(note);
+        return Map.of("Message", "Note set to unFavorite");
+    }
+
+    public List<NotesResponseDTO> getFavoriteNotes(String email) {
+        List<NotesResponseDTO> list = new ArrayList<>();
+        for(Notes note : notesRepository.findByUserEmailAndFavoriteTrueAndDeletedFalse(email)){
             list.add(utilDto.convertNotesToNotsResponseDTO(note));
         }
         return list;

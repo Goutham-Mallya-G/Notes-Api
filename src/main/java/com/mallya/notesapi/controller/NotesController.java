@@ -48,10 +48,15 @@ public class NotesController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-            notesService.deleteNote(id,userDetails.getUsername());
-            return ResponseEntity.ok("Note Deleted");
+    public ResponseEntity<Map<String,String>> deleteNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+            return ResponseEntity.ok(notesService.deleteNote(id,userDetails.getUsername()));
     }
+
+    @PatchMapping("restore/{id}")
+    public ResponseEntity<Map<String,String>> restoreNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(notesService.restoreNote(id, userDetails.getUsername()));
+    }
+
 
     @GetMapping("/search")
     public ResponseEntity<List<NotesResponseDTO>> searchNote(@RequestParam String title, @AuthenticationPrincipal UserDetails userDetails){
@@ -82,4 +87,23 @@ public class NotesController {
         List<NotesResponseDTO> list = notesService.getArchivedNotes(userDetails.getUsername());
         return ResponseEntity.ok(list);
     }
+
+    @PatchMapping("/favorite/{id}")
+    public ResponseEntity<Map<String,String>> favoriteNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        Map<String, String> response = notesService.favoriteNote(id, userDetails.getUsername());
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/unFavorite/{id}")
+    public ResponseEntity<Map<String,String>> unFavoriteNote(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        Map<String, String> response = notesService.unFavoriteNote(id, userDetails.getUsername());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("listAllFavoriteNotes")
+    public ResponseEntity<List<NotesResponseDTO>> getFavoriteNotes(@AuthenticationPrincipal UserDetails userDetails){
+        List<NotesResponseDTO> list = notesService.getFavoriteNotes(userDetails.getUsername());
+        return ResponseEntity.ok(list);
+    }
+
 }

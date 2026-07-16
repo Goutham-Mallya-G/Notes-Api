@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Entity
 @Data
 public class Notes {
@@ -29,5 +32,15 @@ public class Notes {
     @JoinColumn(name = "category_id")
     @JsonBackReference
     private Category category;
-    private boolean archived;
+    @NotNull
+    private boolean archived = false;
+    @NotNull
+    private boolean deleted = false;
+    @NotNull
+    private  boolean favorite = false;
+    @NotNull
+    private LocalDateTime createdAt;
+    @NotNull
+    private LocalDateTime updatedAt;
+
 }
